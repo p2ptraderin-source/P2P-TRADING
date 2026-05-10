@@ -2,7 +2,6 @@
     const socket = io();
     let currentAuthUser = "";
 
-    // LOGIN DATA
     const allowedUsers = { 
         "P2P TRADER KING👑": "63743", 
         "CUSTOMER NO 447": "CN 447" 
@@ -42,8 +41,7 @@
     socket.on('chat message', (data) => {
         const div = document.createElement('div');
         div.className = 'msg-box';
-        
-        // Background color konchem change cheshanu auto-reply ki theliyadaniki
+        // Auto reply ki gold border isthundi
         if(data.isAutoReply) div.style.borderLeft = "4px solid #f3ba2f";
 
         div.innerHTML = `<div class="msg-user">${data.user}</div>` + 
@@ -51,23 +49,6 @@
         
         document.getElementById('messages').appendChild(div);
         document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-
-        // AUTO REPLY LOGIC
-        // 1. Message CUSTOMER daggara nundi raavali
-        // 2. Adhi text message ayyi undali
-        // 3. Nuvvu (KING) login ayyi unnappudu matrame response vellali
-        if (data.user === "CUSTOMER NO 447" && data.type === 'text' && !data.isAutoReply) {
-            if (currentAuthUser === "P2P TRADER KING👑") {
-                setTimeout(() => {
-                    socket.emit('chat message', { 
-                        user: "P2P TRADER KING👑", 
-                        type: 'text', 
-                        content: "Please wait for a moment, I will try to reply to you fast.",
-                        isAutoReply: true 
-                    });
-                }, 2000);
-            }
-        }
     });
 
     document.getElementById('m').addEventListener("keypress", function(event) {
