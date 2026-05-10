@@ -1,55 +1,63 @@
 <script>
-        const socket = io();
-        let currentAuthUser = "";
+    const socket = io();
+    let currentAuthUser = "";
 
-        // LOGIN DATA
-        const allowedUsers = { 
-            "P2P TRADER KING👑": "63743", 
-            "CUSTOMER NO 447": "CN 447" 
-        };
+    // LOGIN DATA
+    const allowedUsers = { 
+        "P2P TRADER KING👑": "63743", 
+        "CUSTOMER NO 447": "CN 447" 
+    };
 
-        function handleLogin() {
-            const u = document.getElementById('user').value;
-            const p = document.getElementById('pass').value;
-            if(allowedUsers[u] && allowedUsers[u] === p) {
-                currentAuthUser = u;
-                document.getElementById('login-screen').style.display = 'none';
-                document.getElementById('chat-screen').style.display = 'flex';
-            } else { 
-                alert("ERROR: Invalid Credentials."); 
-            }
+    function handleLogin() {
+        const u = document.getElementById('user').value;
+        const p = document.getElementById('pass').value;
+        if(allowedUsers[u] && allowedUsers[u] === p) {
+            currentAuthUser = u;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('chat-screen').style.display = 'flex';
+        } else { 
+            alert("ERROR: Invalid Credentials."); 
         }
+    }
 
-        function sendMessage() {
-            const val = document.getElementById('m').value;
-            if(val) {
-                socket.emit('chat message', { user: currentAuthUser, type: 'text', content: val });
-                document.getElementById('m').value = '';
-            }
+    function sendMessage() {
+        const val = document.getElementById('m').value;
+        if(val) {
+            socket.emit('chat message', { user: currentAuthUser, type: 'text', content: val });
+            document.getElementById('m').value = '';
         }
+    }
 
-        document.getElementById('fileInp').onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (ev) => {
-                    socket.emit('chat message', { user: currentAuthUser, type: 'img', content: ev.target.result });
-                };
-                reader.readAsDataURL(file);
-            }
-        };
+    document.getElementById('fileInp').onchange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                socket.emit('chat message', { user: currentAuthUser, type: 'img', content: ev.target.result });
+            };
+            reader.readAsDataURL(file);
+        }
+    };
 
-        socket.on('chat message', (data) => {
-            const div = document.createElement('div');
-            div.className = 'msg-box';
-            div.innerHTML = `<div class="msg-user">${data.user}</div>` + 
-                            (data.type === 'text' ? `<div>${data.content}</div>` : `<img src="${data.content}">`);
-            document.getElementById('messages').appendChild(div);
-            document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+    socket.on('chat message', (data) => {
+        const div = document.createElement('div');
+        div.className = 'msg-box';
+        
+        // Background color konchem change cheshanu auto-reply ki theliyadaniki
+        if(data.isAutoReply) div.style.borderLeft = "4px solid #f3ba2f";
 
-            // --- AUTO REPLY LOGIC ---
-            // Customer message chesinappudu matrame, King account nundi auto reply velthundi
-            if (data.user === "CUSTOMER NO 447" && data.type === 'text' && !data.isAutoReply) {
+        div.innerHTML = `<div class="msg-user">${data.user}</div>` + 
+                        (data.type === 'text' ? `<div>${data.content}</div>` : `<img src="${data.content}">`);
+        
+        document.getElementById('messages').appendChild(div);
+        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+
+        // AUTO REPLY LOGIC
+        // 1. Message CUSTOMER daggara nundi raavali
+        // 2. Adhi text message ayyi undali
+        // 3. Nuvvu (KING) login ayyi unnappudu matrame response vellali
+        if (data.user === "CUSTOMER NO 447" && data.type === 'text' && !data.isAutoReply) {
+            if (currentAuthUser === "P2P TRADER KING👑") {
                 setTimeout(() => {
                     socket.emit('chat message', { 
                         user: "P2P TRADER KING👑", 
@@ -57,11 +65,12 @@
                         content: "Please wait for a moment, I will try to reply to you fast.",
                         isAutoReply: true 
                     });
-                }, 2000); // 2 seconds tharvatha reply velthundi
+                }, 2000);
             }
-        });
+        }
+    });
 
-        document.getElementById('m').addEventListener("keypress", function(event) {
-            if (event.key === "Enter") sendMessage();
-        });
-    </script>
+    document.getElementById('m').addEventListener("keypress", function(event) {
+        if (event.key === "Enter") sendMessage();
+    });
+</script>
