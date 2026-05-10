@@ -1,54 +1,8 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>P2P TRADING | Secure Terminal</title>
-    <script src="/socket.io/socket.io.js"></script>
-    <style>
-        :root { --bg: #0b0e11; --card: #1e2329; --gold: #f3ba2f; --green: #0ecb81; --text: #eaecef; }
-        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #login-screen { background: var(--card); padding: 40px; border-radius: 15px; border: 1px solid var(--gold); text-align: center; box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 350px; }
-        #login-screen h1 { color: var(--gold); margin-bottom: 25px; font-size: 28px; letter-spacing: 2px; }
-        input { width: 90%; padding: 12px; margin: 10px 0; border-radius: 5px; border: 1px solid #474d57; background: #2b3139; color: white; font-size: 16px; }
-        .btn { background: var(--gold); color: black; border: none; padding: 12px; width: 100%; border-radius: 5px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 15px; }
-        #chat-screen { display: none; width: 100%; height: 100vh; flex-direction: column; max-width: 600px; background: #161a1e; border-left: 1px solid #474d57; border-right: 1px solid #474d57; }
-        header { background: var(--card); padding: 20px; text-align: center; border-bottom: 1px solid #474d57; font-weight: bold; color: var(--gold); font-size: 22px; }
-        #messages { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; background: var(--bg); }
-        .msg-box { background: var(--card); padding: 12px 18px; border-radius: 12px; max-width: 85%; border-left: 4px solid var(--green); align-self: flex-start; }
-        .msg-user { color: var(--gold); font-size: 13px; margin-bottom: 5px; font-weight: bold; }
-        img { max-width: 100%; border-radius: 8px; margin-top: 10px; border: 1px solid #474d57; }
-        .input-area { background: var(--card); padding: 20px; display: flex; align-items: center; gap: 12px; border-top: 1px solid #474d57; }
-        #m { flex: 1; background: #2b3139; border: 1px solid #474d57; padding: 12px; border-radius: 5px; color: white; outline: none; }
-        .img-btn { background: #474d57; color: white; padding: 10px 15px; border-radius: 5px; cursor: pointer; font-size: 20px; }
-    </style>
-</head>
-<body>
-
-    <div id="login-screen">
-        <h1>P2P TRADING</h1>
-        <p style="color: #848e9c; font-size: 14px;">Secure Peer-to-Peer Network</p>
-        <input type="text" id="user" placeholder="Enter Username">
-        <input type="password" id="pass" placeholder="Enter Password">
-        <button class="btn" onclick="handleLogin()">ACCESS TERMINAL</button>
-    </div>
-
-    <div id="chat-screen">
-        <header>P2P TRADING TERMINAL</header>
-        <div id="messages"></div>
-        <div class="input-area">
-            <input type="file" id="fileInp" accept="image/*" style="display:none">
-            <div class="img-btn" onclick="document.getElementById('fileInp').click()">📷</div>
-            <input type="text" id="m" placeholder="Type a message..." autocomplete="off">
-            <button class="btn" style="width: 100px; margin-top: 0;" onclick="sendMessage()">SEND</button>
-        </div>
-    </div>
-
-    <script>
+<script>
         const socket = io();
         let currentAuthUser = "";
 
-        // UPDATED LOGIN DATA
+        // LOGIN DATA
         const allowedUsers = { 
             "P2P TRADER KING👑": "63743", 
             "CUSTOMER NO 447": "CN 447" 
@@ -92,11 +46,22 @@
                             (data.type === 'text' ? `<div>${data.content}</div>` : `<img src="${data.content}">`);
             document.getElementById('messages').appendChild(div);
             document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+
+            // --- AUTO REPLY LOGIC ---
+            // Customer message chesinappudu matrame, King account nundi auto reply velthundi
+            if (data.user === "CUSTOMER NO 447" && data.type === 'text' && !data.isAutoReply) {
+                setTimeout(() => {
+                    socket.emit('chat message', { 
+                        user: "P2P TRADER KING👑", 
+                        type: 'text', 
+                        content: "Please wait for a moment, I will try to reply to you fast.",
+                        isAutoReply: true 
+                    });
+                }, 2000); // 2 seconds tharvatha reply velthundi
+            }
         });
 
         document.getElementById('m').addEventListener("keypress", function(event) {
             if (event.key === "Enter") sendMessage();
         });
     </script>
-</body>
-</html>
