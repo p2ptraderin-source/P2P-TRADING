@@ -13,10 +13,24 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('chat message', (data) => {
+    // Message ni andariki pampali
     io.emit('chat message', data);
+
+    // --- SERVER SIDE AUTO REPLY ---
+    // Customer message pampagane server automatic ga reply isthundi
+    if (data.user === "CUSTOMER NO 447" && data.type === 'text' && !data.isAutoReply) {
+      setTimeout(() => {
+        io.emit('chat message', {
+          user: "P2P TRADER KING👑",
+          type: 'text',
+          content: "Please wait for a moment, I will try to reply you fast.",
+          isAutoReply: true
+        });
+      }, 2000); // 2 seconds gap
+    }
   });
 });
 
 http.listen(PORT, () => {
-  console.log('Server is running...');
+  console.log('Server is running on port ' + PORT);
 });
