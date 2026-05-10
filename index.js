@@ -13,11 +13,10 @@ app.get('/', (req, res) => {
 
 io.on('connection', (socket) => {
   socket.on('chat message', (data) => {
-    // Message ni andariki pampali
+    // Standard Message Forwarding
     io.emit('chat message', data);
 
-    // --- SERVER SIDE AUTO REPLY ---
-    // Customer message pampagane server automatic ga reply isthundi
+    // --- AUTO REPLY LOGIC ---
     if (data.user === "CUSTOMER NO 447" && data.type === 'text' && !data.isAutoReply) {
       setTimeout(() => {
         io.emit('chat message', {
@@ -26,7 +25,7 @@ io.on('connection', (socket) => {
           content: "Please wait for a moment, I will try to reply you fast.",
           isAutoReply: true
         });
-      }, 2000); // 2 seconds gap
+      }, 2000);
     }
   });
 });
